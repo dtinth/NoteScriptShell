@@ -1,0 +1,59 @@
+// Move notes to scratch.
+
+// <Configuration>
+
+// scratch: space separated list of notes to move to scratch.
+scratch = '0C';
+
+// </Configuration>
+
+scratch = scratch.split(/\s+/).map(function(x) {
+	return parseInt(x, 36);
+});
+
+
+var lnref = {};
+var scref = {};
+var snapshot = chart.snapshotByTime();
+
+snapshot.forEach(function(note) {
+	var check = false;
+	if (note.getFlag() == 2) {
+		if (lnref[note.getChannel()]) {
+			lnref[note.getChannel()]._tail = note;
+			note._head = lnref[note.getChannel()];
+			lnref[note.getChannel()] = null;
+		} else {
+			lnref[note.getChannel()] = note;
+			check = true;
+		}
+	} else {
+		check = true;
+	}
+	if (check && note.getChannel() == 16) {
+		scref[note.getTime()] = note;
+	}
+});
+
+function isScratch(note) {
+	if (note.getChannel() < 100) {
+		if (note.getChannel() < 11) return false;
+		if (note.getChannel() > 19) return false;
+	}
+	for (var i = 0; i < scratch.length; i ++) {
+		if (note.getData() == scratch[i]) {
+			return true;
+		}
+	}
+	return false;
+}
+
+snapshot.forEach(function(note) {
+	if (isScratch(note) && !scref[note.getTime()]) {
+		scref[note.getTime()] = note;
+		note.setChannel('016');
+		if (note._tail) {
+			note._tail.delete();
+		}
+	}
+});

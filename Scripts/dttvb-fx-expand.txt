@@ -1,0 +1,29 @@
+// Prompts for ratio, and expand the notes by that ratio.
+
+// <Configuration>
+ratio = 2
+// </Configuration>
+
+// Example Code: Compress Note
+ratio = 1 * parseFloat(ratio);
+
+if (isNaN(ratio))
+	throw ("Invalid Ratio")
+
+// Get notes
+var notes = chart.snapshotByTime();
+// This function will be called on each note.
+function process(note) {
+
+	// Compress the note by change its time.
+	note.setTime (note.getTime() * ratio);
+
+	// If it's a BPM, it needs changing also.
+	if (isBPM(note)) {
+		note.setData (note.getData() * ratio);
+	}
+
+}
+
+// Process each note.
+notes.forEach (process);

@@ -1,0 +1,16 @@
+// Remove all longnotes's end. Convert all back to normal notes.
+
+var c = chart.snapshotGroupedByChannel();
+var count = 0;
+var dolist = function(n) {
+    for (var i = 0; i < n.length; i ++) {
+        if (n[i].getFlag() == '2') {
+            n[i].setFlag('0');
+            count ++;
+            i ++; if (n[i]) n[i].delete();
+        }
+    }
+};
+for (var i in c.h) {
+    dolist (c.h[i]);
+}

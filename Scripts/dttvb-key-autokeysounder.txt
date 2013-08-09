@@ -1,0 +1,124 @@
+// Put keysounds in place of the normal notes of Z1 to ZZ, Z1 means auto BGM track 1 will be used.
+
+// <Configuration>
+
+// AutoPilot: Put auto BGM notes into 01 notes too.
+// This mode always exclude the B01 lane which usually contains the BGM note.
+// Without autopilot the script will insert notes into Z1 to ZZ notes only.
+enableAutoPilot = 1;
+
+// AutoPilot Mode
+//     0: right first
+//     1: left first
+//     2: switch every measure
+//     3: random
+autoPilotStyle = 2;
+
+// </Configuration>
+
+
+
+
+
+
+
+
+
+
+
+
+var lnref = {};
+function doTime(x) {
+
+	// Process longnote
+	for (var i in x) {
+		var chan = x[i].getChannel();
+		if (chan.substr(0, 2) == '01') {
+			if (lnref[chan] !== undefined) {
+				x[i].setData (lnref[chan].getData());
+				x[i].setFlag ('2');
+				lnref[chan] = undefined;
+			} else if (x[i].getFlag() == 2) {
+				lnref[chan] = x[i];
+			}
+		}
+	}
+	
+	// Do the reserved one first!
+	for (var i in x) {
+		var chan = x[i].getChannel();
+		if (chan.substr(0, 2) == '01') {
+			var data = x[i].getData();
+			if (data < 1261 && data > 1293) {
+				continue;
+			}
+			var norm = 101 + data - 1261;
+			if (x[i].getFlag() != 2 || lnref[chan] !== undefined) {
+				if (x[norm] !== undefined && !x[norm].isDeleted()) {
+					x[i].setData (x[norm].getData());
+					x[norm].delete ();
+				} else {
+					x[i].setData (1);
+				}
+			}
+		}
+	}
+
+	// Autopilots
+	if (enableAutoPilot) {
+	
+		var pilots = [];
+	
+		for (var i in x) {
+			var chan = x[i].getChannel();
+			if (chan.substr(0, 1) == '1') {
+				if (chan != 101)
+					pilots.push (x[i]);
+			}
+		}
+		
+		pilots.sort (function(a, b) {
+			if (autoPilotStyle == 3) return Math.random() - 0.5;
+			if (autoPilotStyle == 2) return (a.getTime() % 384 >= 192 ? 1 : -1) * (a.getChannel() - b.getChannel());
+			if (autoPilotStyle == 1) return (a.getChannel() - b.getChannel());
+			return (b.getChannel() - a.getChannel());
+		});
+
+		for (var i in x) {
+			var chan = x[i].getChannel();
+			if (chan.substr(0, 2) == '01') {
+				var data = x[i].getData();
+				if (data != 1) {
+					continue;
+				}
+				if (x[i].getFlag() != 2 || lnref[chan] !== undefined) {
+					if (pilots.length > 0) {
+						x[i].setData (pilots[0].getData());
+						pilots[0].delete ();
+						pilots.shift ();
+					}
+				}
+			}
+		}
+		
+	}
+
+}
+
+var n = chart.snapshotByTime();
+var l = [];
+var c = null;
+var lt = -1;
+for (var i = 0; i < n.length; i ++) {
+   if (n[i].getTime() != lt) {
+       if (c != null)
+           l.push (c);
+       c = {};
+       lt = n[i].getTime();
+   }
+   c[n[i].getChannel()] = n[i];
+}
+l.push (c);
+for (var i = 0; i < l.length; i ++) {
+   doTime (l[i]);
+}

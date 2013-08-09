@@ -1,0 +1,1 @@
+/c/haxe/haxe -js ../../Lib/libbmse-hx2.js dt.bms.BMSENoteChart dt.bms.BMSENote

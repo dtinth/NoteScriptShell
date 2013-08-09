@@ -1,0 +1,15 @@
+// Mirror notes from SC - 6.
+
+var chFrom = ('016,011,012,013,014,015,018').split(',');
+var chTo = chFrom.slice();
+chTo.reverse();
+
+var chMap = {};
+for (var i = 0; i < chFrom.length; i ++)
+	chMap[chFrom[i]] = chTo[i];
+
+chart.snapshot().forEach (function(note) {
+	var ch = note.getChannel();
+	if (chMap[ch] !== undefined)
+		note.setChannel (chMap[ch]);
+});

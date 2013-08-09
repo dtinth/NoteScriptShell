@@ -1,0 +1,10 @@
+This application includes and makes use of the JavaScript Shell which is the
+part of SpiderMonkey JavaScript Engine.
+
+http://www.mozilla.org/js/spidermonkey/
+
+
+
+How I compiled it:
+
+http://jargon.ca/spidermonkey/

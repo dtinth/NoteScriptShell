@@ -1,0 +1,20 @@
+// Make subsequent note with same data on same channel increment its data by one.
+
+var n = chart.snapshotByTime();
+var cv = {};
+var itr = {};
+for (var i = 0; i < n.length; i ++) {
+    var c = n[i];
+    var ch = c.getChannel();
+    var dt = c.getData();
+    if (itr[ch] == undefined) {
+        itr[ch] = 0;
+    }
+    if (cv[ch] == dt) { 
+        itr[ch] ++;
+        c.setData (dt + itr[ch]);
+    } else {
+        itr[ch] = 0;
+        cv[ch] = dt;
+    }
+}

@@ -1,0 +1,35 @@
+// Optimizes sound files.
+
+// <Configuration>
+
+// Instructions is not yet available.
+// Note that # won't be repeated!
+definitions = [
+	['02', 'aabaabaabaabaabccdccdccdccdccd'],
+	['2L', 'lmltDtlmlmltDtlmfdfslsfdfdfslsfl'],
+];
+
+// </Configuration>
+
+
+
+var maps = {};
+definitions.forEach (function(x) {
+	var start = parseInt(x[0], 36);
+	var keys = {};
+	for (var i = 0 ; i < x[1].length; i ++) {
+		var c = x[1].charAt(i);
+		if (keys[c] === undefined && c != '#') {
+			keys[c] = start + i;
+		} else {
+			maps[start + i] = keys[c];
+		}
+	}
+});
+chart.getNotes().forEach (function(x) {
+	if (isAuto(x)) {
+		if (maps[x.getData()] !== undefined) {
+			x.setData (maps[x.getData()]);
+		}
+	}
+});

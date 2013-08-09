@@ -1,0 +1,12 @@
+// Remove notes on the same channel and time. Keeps the last one.
+
+var hash = {};
+var notes = chart.snapshot();
+
+notes.forEach (function(note) {
+	var id = note.getTime() + '-' + note.getChannel();
+	if (hash[id] !== undefined) {
+		hash[id].delete ();
+	}
+	hash[id] = note;
+});

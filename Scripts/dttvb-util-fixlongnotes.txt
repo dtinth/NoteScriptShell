@@ -1,0 +1,22 @@
+// Makes all notes behave like uBMPlay (other notes can closes longnotes too) and fix all note's ending.
+
+var c = chart.snapshotGroupedByChannel();
+var count = 0;
+var dolist = function(n) {
+	var open = false;
+    for (var i = 0; i < n.length; i ++) {
+   		if (open) {
+			n[i].setData (open.getData());
+			n[i].setFlag ('2');
+			open = false;
+		} else if (n[i].getFlag() == '2') {
+			open = n[i];
+        }
+    }
+    if (open) {
+		open.setFlag ('0');
+    }
+};
+for (var i in c.h) {
+    dolist (c.h[i]);
+}

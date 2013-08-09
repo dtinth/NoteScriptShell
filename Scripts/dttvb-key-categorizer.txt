@@ -1,0 +1,70 @@
+// Organize everything back into autokeysounds.
+
+// <Configuration>
+
+// Instruction: Each sound file ID inserted here will act as a category.
+// Take this example: 02 24 2L 36
+// All notes in range [02-23] will be put into B01.
+// All notes in range [24-2K] will be put into B02.
+// All notes in range [2L-35] will be put into B03.
+// All notes in range [36-ZZ] will be put into B04.
+// There can be as much as 32 categories!
+
+cats = '02 24 2L 36 38 39 3A 6B 6C 7S 9D D4 D7 HF';
+
+// </Configuration>
+
+var c = chart.snapshotGroupedByChannel();
+var count = 0;
+var dolist = function(n) {
+    for (var i = 0; i < n.length; i ++) {
+        if (n[i].getFlag() == '2') {
+            n[i].setFlag('0');
+            count ++;
+            i ++; if (n[i]) n[i].delete();
+        }
+    }
+};
+for (var i in c.h) {
+    dolist (c.h[i]);
+}
+
+cats = cats.match(/[a-z0-9A-Z]{1,2}/g);
+for (var i = 0; i < cats.length; i ++) {
+	cats[i] = parseInt(cats[i], 36);
+}
+function doLine(x) {
+	x.sort (function(a, b) {
+		return a.getData() - b.getData();
+	});
+	var max = 0;
+	x.forEach (function(note) {
+		var cc = 1;
+		for (var i = cats.length - 1; i >= 0; i --) {
+			if (note.getData() >= cats[i]) {
+				cc = i + 1;
+				break;
+			}
+		}
+		max = Math.max(max + 1, cc);
+		note.setChannel ('' + (100 + max));
+	});
+}
+
+var n = chart.snapshotByTime();
+var l = [];
+var c = null;
+var lt = -1;
+for (var i = 0; i < n.length; i ++) {
+   if (n[i].getTime() != lt) {
+       if (c != null)
+           l.push (c);
+       c = [];
+       lt = n[i].getTime();
+   }
+   c.push (n[i]);
+}
+l.push (c);
+for (var i = 0; i < l.length; i ++) {
+   doLine (l[i]);
+}
